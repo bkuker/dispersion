@@ -271,6 +271,9 @@ public class Display extends JPanel implements GLEventListener {
 		List<Double> z = b.get(FlightDataType.TYPE_ALTITUDE);
 		List<Double> vz = b.get(FlightDataType.TYPE_VELOCITY_Z);
 
+		List<Double> thrust = b.get(FlightDataType.TYPE_THRUST_FORCE);
+		double maxThrust = b.getMaximum(FlightDataType.TYPE_THRUST_FORCE);
+
 		if (simulations.size() < 10)
 			gl.glLineWidth(3);
 		else if (simulations.size() < 100)
@@ -287,7 +290,13 @@ public class Display extends JPanel implements GLEventListener {
 				v = v / 15;
 				gl.glColor4d(v, 0, 0, a);
 			} else {
-				gl.glColor4d(0, 0, 0, a);
+				double t = thrust.get(i);
+				if (t > 0) {
+					double c =t / maxThrust + .3;
+					gl.glColor4d(c, .8*c, 0, a);
+				} else {
+					gl.glColor4d(0, 0, 0, a);
+				}
 			}
 			gl.glVertex3d(x.get(i), y.get(i), z.get(i));
 		}
