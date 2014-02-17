@@ -16,5 +16,10 @@
 
 		<dependency org="org.jogamp.jogl" name="jogl-all" rev="2.0.2" />
 
+		<dependency org="colt" name="colt" rev="1.2.0" />
+		<dependency org="org.apache.commons" name="commons-math"
+			rev="2.2" />
+
+
 	</dependencies>
 </ivy-module>

@@ -60,6 +60,8 @@ public class Display extends JPanel implements GLEventListener {
 	GL2 gl;
 	GLU glu;
 	GLUquadric q;
+	
+	private final Density d = new Density();
 
 	public void addSimulation(final Simulation s) {
 		simulations.offer(s);
@@ -79,6 +81,7 @@ public class Display extends JPanel implements GLEventListener {
 				impact.offer(c);
 			else
 				landing.offer(c);
+			d.add(c);
 		}
 
 		repaint();
@@ -234,11 +237,15 @@ public class Display extends JPanel implements GLEventListener {
 		gl.glDisable(GL2.GL_FOG);
 
 		drawUpArrow(drawable);
-
-		if (viewAlt < 89)
-			drawSimulations(drawable);
+		
 		drawPoints(drawable);
 
+		d.draw(drawable);
+		
+		if (viewAlt < 89)
+			drawSimulations(drawable);
+		
+		
 		gl = null;
 	}
 

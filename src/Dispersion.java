@@ -4,6 +4,7 @@ import java.util.Random;
 import javax.swing.JFrame;
 
 import mutators.MassMutator;
+import mutators.ParachuteFailure;
 import mutators.RodAngleMutator;
 import net.sf.openrocket.database.Databases;
 import net.sf.openrocket.document.OpenRocketDocument;
@@ -20,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import variables.Gaussian;
+import variables.Odds;
 import variables.Uniform;
 
 import com.google.inject.Guice;
@@ -82,13 +84,13 @@ public class Dispersion {
 
 		Random r = new Random(0);
 
-		for (int i = 0; i < 20; i++) {
+		for (int i = 0; i < 750; i++) {
 			OpenRocketDocument doc = orig.copy();
-			Simulation s = doc.getSimulation(0).copy();
+			Simulation s = doc.getSimulation(1).copy();
 
 			new MassMutator(new Gaussian(new Gaussian(0.0, 0.05), 0.05)).mutate(doc.getRocket());
-			// new ParachuteFailure(new Odds(.05)).mutate(doc.getRocket());
-			new RodAngleMutator(new Gaussian(0.08), new Uniform(-Math.PI, Math.PI)).mutate(s.getOptions());
+			new ParachuteFailure(new Odds(.1)).mutate(doc.getRocket());
+			new RodAngleMutator(new Gaussian(0.04), new Uniform(-Math.PI, Math.PI)).mutate(s.getOptions());
 
 			s.getOptions().setRandomSeed(r.nextInt());
 			s.simulate();

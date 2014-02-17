@@ -107,7 +107,7 @@ public class KernelDensityEstimator2D implements ContourMaker {
                 for (int k = 0; k < nx; k++) {
                     value += ax[i][k] * ay[j][k];
                 }
-                z[i][j] = value / scale;
+                z[j][i] = value / scale;
             }
         }
     }
@@ -192,7 +192,7 @@ public class KernelDensityEstimator2D implements ContourMaker {
         return seq;
     }
 
-    private double margin = 0.1;
+    private double margin = 0.7;
 
     private void setupLims() {
         lims = new double[4];
