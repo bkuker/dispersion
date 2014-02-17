@@ -68,16 +68,18 @@ public class Display extends JPanel implements GLEventListener {
 		if (simulations.size() > LIMIT)
 			simulations.poll();
 
-		FlightDataBranch b = s.getSimulatedData().getBranch(0);
+		for (int bi = 0; bi < s.getSimulatedData().getBranchCount(); bi++) {
+			FlightDataBranch b = s.getSimulatedData().getBranch(bi);
 
-		final Coordinate c = new Coordinate(b.getLast(FlightDataType.TYPE_POSITION_X),
-				b.getLast(FlightDataType.TYPE_POSITION_Y), 0);
-		final double vz = b.getLast(FlightDataType.TYPE_VELOCITY_Z);
+			final Coordinate c = new Coordinate(b.getLast(FlightDataType.TYPE_POSITION_X),
+					b.getLast(FlightDataType.TYPE_POSITION_Y), 0);
+			final double vz = b.getLast(FlightDataType.TYPE_VELOCITY_Z);
 
-		if (vz < -10)
-			impact.offer(c);
-		else
-			landing.offer(c);
+			if (vz < -10)
+				impact.offer(c);
+			else
+				landing.offer(c);
+		}
 
 		repaint();
 	}
