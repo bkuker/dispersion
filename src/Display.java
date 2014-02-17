@@ -28,6 +28,7 @@ import net.sf.openrocket.document.Simulation;
 import net.sf.openrocket.gui.figure3d.photo.exhaust.FlameRenderer;
 import net.sf.openrocket.simulation.FlightDataBranch;
 import net.sf.openrocket.simulation.FlightDataType;
+import net.sf.openrocket.util.MathUtil;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,9 +48,12 @@ public class Display extends JPanel implements GLEventListener {
 
 	private double viewAlt = 45;
 	private double viewAz = 0;
-	private double viewDist = 10;
+	private double viewDist = 100;
 
 	private final Collection<Simulation> simulations = new ConcurrentLinkedQueue<Simulation>();
+
+	GLU glu;
+	GLUquadric q;
 
 	public void addSimulation(final Simulation s) {
 		simulations.add(s);
@@ -98,7 +102,8 @@ public class Display extends JPanel implements GLEventListener {
 
 			@Override
 			public void mouseWheelMoved(MouseWheelEvent e) {
-				viewDist += 1 * e.getWheelRotation();
+				viewDist += 7 * e.getWheelRotation();
+				viewDist = MathUtil.clamp(viewDist, 7, 200);
 				Display.this.repaint();
 			}
 
@@ -118,6 +123,8 @@ public class Display extends JPanel implements GLEventListener {
 
 				viewAlt -= (y1 - y2) * 100;
 				viewAz += (x1 - x2) * 100;
+
+				viewAlt = MathUtil.clamp(viewAlt, 1, 90);
 
 				lastX = e.getX();
 				lastY = e.getY();
@@ -149,8 +156,11 @@ public class Display extends JPanel implements GLEventListener {
 	public void display(final GLAutoDrawable drawable) {
 		log.debug("display()");
 		GL2 gl = drawable.getGL().getGL2();
-		GLU glu = new GLU();
-		GLUquadric q = glu.gluNewQuadric();
+
+		if (glu == null) {
+			glu = new GLU();
+			q = glu.gluNewQuadric();
+		}
 
 		gl.glEnable(GL.GL_MULTISAMPLE);
 
@@ -158,12 +168,12 @@ public class Display extends JPanel implements GLEventListener {
 		gl.glDepthFunc(GL.GL_LESS);
 		gl.glEnable(GL.GL_DEPTH_TEST);
 
-		gl.glClearColor(1, 1, 1, 1);
+		gl.glClearColor(.90f, .90f, 1, 1);
 		gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
 
 		gl.glMatrixMode(GLMatrixFunc.GL_PROJECTION);
 		gl.glLoadIdentity();
-		glu.gluPerspective(60, ratio, 2f, 300f);
+		glu.gluPerspective(60, ratio, 2f, 400f);
 		gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
 
 		gl.glLoadIdentity();
@@ -175,13 +185,12 @@ public class Display extends JPanel implements GLEventListener {
 		gl.glRotated(viewAlt, 1, 0, 0);
 		gl.glRotated(viewAz, 0, 0, 1);
 
-		gl.glTranslated(0, 0, -viewDist/4);
+		gl.glTranslated(0, 0, Math.sin(Math.toRadians(viewAlt)) * (-viewDist / 4));
 
 		gl.glColor3d(0, 0, 0);
-		glu.gluSphere(q, 0.1f, 10, 10);
 
-		drawUpArrow(drawable);
 		drawGroundGrid(drawable);
+		drawUpArrow(drawable);
 		drawSimulations(drawable);
 	}
 
@@ -201,55 +210,95 @@ public class Display extends JPanel implements GLEventListener {
 		List<Double> z = b.get(FlightDataType.TYPE_ALTITUDE);
 		List<Double> vz = b.get(FlightDataType.TYPE_VELOCITY_Z);
 
-		
-		gl.glLineWidth(1);
+		if (simulations.size() < 10)
+			gl.glLineWidth(3);
+		else if (simulations.size() < 100)
+			gl.glLineWidth(2);
+		else
+			gl.glLineWidth(1);
 
 		gl.glBegin(GL.GL_LINE_STRIP);
 		for (int i = 0; i < n; i++) {
-			gl.glColor3d(-vz.get(i) * .05, vz.get(i) * .01, vz.get(i) * .01);
+			double v = vz.get(i);
+			if (v < -5) {
+				v = MathUtil.clamp(v, -20, -5);
+				v = -v - 5;
+				v = v / 15;
+				gl.glColor3d(v, 0, 0);
+			} else {
+				gl.glColor3f(0, 0, 0);
+			}
 			gl.glVertex3d(x.get(i), y.get(i), z.get(i));
 		}
 		gl.glEnd();
-		
-		if ( vz.get(n-1) < -10 ){
-			gl.glColor3d(1,0,0);
-			
-			GLU glu = new GLU();
-			GLUquadric q = glu.gluNewQuadric();
+
+		if (vz.get(n - 1) < -10) {
+			gl.glColor3d(1, 0, 0);
 			gl.glPushMatrix();
-			gl.glTranslated(x.get(n-1), y.get(n-1), 0);
-			//gl.glScaled(1, 1, .5);
+			gl.glTranslated(x.get(n - 1), y.get(n - 1), 0);
 			glu.gluSphere(q, .5, 10, 10);
 			gl.glPopMatrix();
-			
 		}
 	}
 
+	/**
+	 * Draw a nice little 1m tall arrow at the origin, pointing up
+	 * 
+	 * @param drawable
+	 */
 	public void drawUpArrow(final GLAutoDrawable drawable) {
-
 		GL2 gl = drawable.getGL().getGL2();
 
-		gl.glColor3d(.7, 0, 0);
-		gl.glLineWidth(2);
+		gl.glColor3d(0.1, 0.5, 0.1);
 
-		gl.glBegin(GL.GL_LINES);
-		gl.glVertex3f(0, 0, 0);
-		gl.glVertex3f(0, 0, 1);
-		gl.glEnd();
-
-		GLU glu = new GLU();
-		GLUquadric q = glu.gluNewQuadric();
-		gl.glTranslated(0, 0, 1);
 		glu.gluSphere(q, 0.1f, 10, 10);
-		gl.glTranslated(0, 0, -1);
+		glu.gluCylinder(q, .05, .05, .7, 10, 10);
+		gl.glTranslated(0, 0, .7);
+		glu.gluCylinder(q, .15, 0, .3, 20, 1);
+		gl.glTranslated(0, 0, -.7);
 	}
 
 	public void drawGroundGrid(final GLAutoDrawable drawable) {
 		GL2 gl = drawable.getGL().getGL2();
-		gl.glColor3d(0, 0, 0);
 
 		final int MAX = 100;
+		final int f = 5;
 
+		// Draw a Big green square for the ground plane
+		gl.glColor3d(.9, .95, .85);
+		gl.glBegin(GL.GL_TRIANGLE_FAN);
+		gl.glVertex3f(-MAX * f, -MAX * f, 0);
+		gl.glVertex3f(-MAX * f, MAX * f, 0);
+		gl.glVertex3f(MAX * f, MAX * f, 0);
+		gl.glVertex3f(MAX * f, -MAX * f, 0);
+		gl.glEnd();
+
+		// Disable depth test, all of this gets drawn over ground plane
+		gl.glDisable(GL.GL_DEPTH_TEST);
+
+		// Draw a white square for the grid to go on
+		gl.glColor3d(1, 1, 1);
+		gl.glBegin(GL.GL_TRIANGLE_FAN);
+		gl.glVertex3f(-MAX, -MAX, 0);
+		gl.glVertex3f(-MAX, MAX, 0);
+		gl.glVertex3f(MAX, MAX, 0);
+		gl.glVertex3f(MAX, -MAX, 0);
+		gl.glEnd();
+
+		// Draw big X and Y axes
+		// gl.glColor3d(0, 0, 0);
+		//
+		// gl.glBegin(GL.GL_LINES);
+		// gl.glVertex3f(0, -MAX*f, 0);
+		// gl.glVertex3f(0, MAX*f, 0);
+		// gl.glEnd();
+		//
+		// gl.glBegin(GL.GL_LINES);
+		// gl.glVertex3f(-MAX*f, 0, 0);
+		// gl.glVertex3f(MAX*f, 0, 0);
+		// gl.glEnd();
+
+		// Draw grid
 		for (int x = -MAX; x <= MAX; x++) {
 			if (x % 10 == 0) {
 				gl.glColor3d(0, 0, 0);
@@ -278,10 +327,8 @@ public class Display extends JPanel implements GLEventListener {
 			gl.glEnd();
 		}
 
-		gl.glBegin(GL.GL_LINES);
-		gl.glVertex3f(0, -1, 0);
-		gl.glVertex3f(0, 1, 0);
-		gl.glEnd();
+		gl.glEnable(GL.GL_DEPTH_TEST);
+
 	}
 
 	@Override
