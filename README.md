@@ -1,9 +1,9 @@
-Dispersion Tool using OpenRocket simulations
-==========
+# Dispersion Tool 
+## Using OpenRocket simulations
 
-OpenRocket based dispersion tool with OpenGL 3D visualization.
 
-![Screenshot](docs/screenshot.png)
+![Screenshot](docs/screenshot2.png)
+
 
 ## Examples
 
@@ -24,3 +24,7 @@ The following examples have up to:
 ### Simple Model Rocket, B Motor (Simulation #2)
 
 ![Screenshot](docs/simple-b.png)
+
+##Screenshots
+
+![Screenshot](docs/screenshot.png)
