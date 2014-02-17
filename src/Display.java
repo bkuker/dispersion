@@ -203,7 +203,7 @@ public class Display extends JPanel implements GLEventListener {
 
 		gl.glMatrixMode(GLMatrixFunc.GL_PROJECTION);
 		gl.glLoadIdentity();
-		glu.gluPerspective(60, ratio, 10f, 10000f);
+		glu.gluPerspective(60, ratio, viewDist / 10, viewDist * 10);
 		gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
 
 		gl.glLoadIdentity();
@@ -217,9 +217,20 @@ public class Display extends JPanel implements GLEventListener {
 
 		gl.glTranslated(0, 0, -viewDist / 3);
 
-		gl.glColor3d(0, 0, 0);
+		log.debug("Distance: {}", viewDist);
+
+		gl.glFogi(GL2.GL_FOG_MODE, GL2.GL_LINEAR);
+		gl.glFogfv(GL2.GL_FOG_COLOR, new float[] { .9f, .95f, .85f }, 0);
+		gl.glFogf(GL2.GL_FOG_DENSITY, 0.1f);
+		gl.glHint(GL2.GL_FOG_HINT, GL2.GL_NICEST);
+		gl.glFogf(GL2.GL_FOG_START, (float) (viewDist * 5));
+		gl.glFogf(GL2.GL_FOG_END, (float) (viewDist * 10));
+		gl.glEnable(GL2.GL_FOG);
 
 		drawGroundGrid(drawable);
+
+		gl.glDisable(GL2.GL_FOG);
+
 		drawUpArrow(drawable);
 
 		if (viewAlt < 89)
@@ -331,9 +342,9 @@ public class Display extends JPanel implements GLEventListener {
 
 	public void drawGroundGrid(final GLAutoDrawable drawable) {
 
-		// Draw a white square for the grid to go on
+		// Draw a Big green square for the ground plane
 		final int MAX = 10000;
-		gl.glColor3d(1, 1, 1);
+		gl.glColor3d(.9, .95, .85);
 		gl.glBegin(GL.GL_TRIANGLE_FAN);
 		gl.glVertex3f(-MAX, -MAX, 0);
 		gl.glVertex3f(-MAX, MAX, 0);
@@ -345,22 +356,39 @@ public class Display extends JPanel implements GLEventListener {
 		gl.glDisable(GL.GL_DEPTH_TEST);
 
 		// Draw grid
-		final int DIA = 50;
 		final int LEVELS = 2;
 
-		for (int level = 0; level <= LEVELS; level++) {
+		for (int level = LEVELS; level >= 0; level--) {
 			int d = (int) (Math.pow(10, level));
-			double c = 1 - .3 * (level + 1);
-			gl.glColor3d(c, c + .05, c);
-			gl.glLineWidth(level + 1);
+
+			gl.glColor3d(1, 1, 1);
+			gl.glBegin(GL.GL_TRIANGLE_FAN);
+			int D = 50 * d;
+			gl.glVertex3f(-D, -D, 0);
+			gl.glVertex3f(-D, D, 0);
+			gl.glVertex3f(D, D, 0);
+			gl.glVertex3f(D, -D, 0);
+			gl.glEnd();
+
+			gl.glColor3d(.7, .75, .7);
+			gl.glLineWidth(1);
 			gl.glBegin(GL.GL_LINES);
-			for (int x = -DIA * d; x <= DIA * d; x += d) {
-				// X line
-				gl.glVertex3f(x, -d * DIA, 0);
-				gl.glVertex3f(x, d * DIA, 0);
-				// Y line
-				gl.glVertex3f(-d * DIA, x, 0);
-				gl.glVertex3f(d * DIA, x, 0);
+			for (int x = -50 * d; x <= 50 * d; x += d) {
+				gl.glVertex3f(x, -d * 50, 0);
+				gl.glVertex3f(x, d * 50, 0);
+				gl.glVertex3f(-d * 50, x, 0);
+				gl.glVertex3f(d * 50, x, 0);
+			}
+			gl.glEnd();
+			gl.glColor3d(0, 0, 0);
+			gl.glLineWidth(2);
+			gl.glBegin(GL.GL_LINES);
+			d = d * 10;
+			for (int x = -5 * d; x <= 5 * d; x += d) {
+				gl.glVertex3f(x, -d * 5, 0);
+				gl.glVertex3f(x, d * 5, 0);
+				gl.glVertex3f(-d * 5, x, 0);
+				gl.glVertex3f(d * 5, x, 0);
 			}
 			gl.glEnd();
 		}
