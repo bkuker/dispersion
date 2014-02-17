@@ -5,6 +5,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.util.Collection;
 import java.util.List;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.media.opengl.DebugGL2;
@@ -28,6 +29,7 @@ import net.sf.openrocket.document.Simulation;
 import net.sf.openrocket.gui.figure3d.photo.exhaust.FlameRenderer;
 import net.sf.openrocket.simulation.FlightDataBranch;
 import net.sf.openrocket.simulation.FlightDataType;
+import net.sf.openrocket.util.Coordinate;
 import net.sf.openrocket.util.MathUtil;
 
 import org.slf4j.Logger;
@@ -50,15 +52,34 @@ public class Display extends JPanel implements GLEventListener {
 	private double viewAz = 0;
 	private double viewDist = 100;
 
-	private final Collection<Simulation> simulations = new ConcurrentLinkedQueue<Simulation>();
+	private final int LIMIT = 100;
+	private final Queue<Simulation> simulations = new ConcurrentLinkedQueue<Simulation>();
 	Simulation highlighted;
+
+	private final Queue<Coordinate> landing = new ConcurrentLinkedQueue<Coordinate>();
+	private final Queue<Coordinate> impact = new ConcurrentLinkedQueue<Coordinate>();
 
 	GLU glu;
 	GLUquadric q;
 
 	public void addSimulation(final Simulation s) {
-		simulations.add(s);
-		highlighted = s;
+		simulations.offer(s);
+		//highlighted = s;
+
+		if ( simulations.size() > LIMIT )
+			simulations.poll();
+		
+		FlightDataBranch b = s.getSimulatedData().getBranch(0);
+
+		final Coordinate c = new Coordinate(b.getLast(FlightDataType.TYPE_POSITION_X),
+				b.getLast(FlightDataType.TYPE_POSITION_Y), 0);
+		final double vz = b.getLast(FlightDataType.TYPE_VELOCITY_Z);
+		
+		if (vz < -10)
+			impact.offer(c);
+		else
+			landing.offer(c);
+
 		repaint();
 	}
 
@@ -193,16 +214,27 @@ public class Display extends JPanel implements GLEventListener {
 
 		drawGroundGrid(drawable);
 		drawUpArrow(drawable);
-		drawSimulations(drawable);
+		
+		if ( viewAlt < 89 )
+			drawSimulations(drawable);
+		drawPoints(drawable);
 	}
 
 	public void drawSimulations(final GLAutoDrawable drawable) {
+		GL2 gl = drawable.getGL().getGL2();
+		
+		gl.glEnable(GL.GL_BLEND);
+		gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
+		gl.glDepthMask(false);
+		double a = 1 - (.01 * simulations.size());
 		for (final Simulation s : simulations) {
-			drawSimulation(s, s == highlighted, drawable);
+			a = a + .01;
+			drawSimulation(s, s == highlighted, a, drawable);
 		}
+		gl.glDepthMask(true);
 	}
 
-	public void drawSimulation(final Simulation s, final boolean highlight, final GLAutoDrawable drawable) {
+	public void drawSimulation(final Simulation s, final boolean highlight, final double a, final GLAutoDrawable drawable) {
 		GL2 gl = drawable.getGL().getGL2();
 
 		FlightDataBranch b = s.getSimulatedData().getBranch(0);
@@ -226,17 +258,15 @@ public class Display extends JPanel implements GLEventListener {
 				v = MathUtil.clamp(v, -20, -5);
 				v = -v - 5;
 				v = v / 15;
-				gl.glColor3d(v, 0, 0);
+				gl.glColor4d(v, 0, 0, a);
 			} else {
-				gl.glColor3f(0, 0, 0);
+				gl.glColor4d(0, 0, 0, a);
 			}
 			gl.glVertex3d(x.get(i), y.get(i), z.get(i));
 		}
 		gl.glEnd();
 
 		if (highlight) {
-			gl.glEnable(GL.GL_BLEND);
-			gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
 			gl.glColor4d(0, 0, 0, .3);
 			gl.glBegin(GL.GL_TRIANGLE_STRIP);
 			for (int i = 0; i < n; i++) {
@@ -254,11 +284,24 @@ public class Display extends JPanel implements GLEventListener {
 			gl.glEnd();
 		}
 
-		if (vz.get(n - 1) < -10) {
-			gl.glColor3d(1, 0, 0);
+	}
+	
+	public void drawPoints(final GLAutoDrawable drawable) {
+		GL2 gl = drawable.getGL().getGL2();
+		gl.glColor3d(1, 0, 0);
+		
+		for ( final Coordinate c : impact ){
 			gl.glPushMatrix();
-			gl.glTranslated(x.get(n - 1), y.get(n - 1), 0);
-			glu.gluSphere(q, .5, 10, 10);
+			gl.glTranslated(c.x, c.y, c.z);
+			glu.gluSphere(q, .5, 8, 5);
+			gl.glPopMatrix();
+		}
+		
+		gl.glColor3d(.1,.3,.1);
+		for ( final Coordinate c : landing ){
+			gl.glPushMatrix();
+			gl.glTranslated(c.x, c.y, c.z);
+			glu.gluSphere(q, .5, 8, 5);
 			gl.glPopMatrix();
 		}
 	}
@@ -325,6 +368,8 @@ public class Display extends JPanel implements GLEventListener {
 			if (x % 10 == 0) {
 				gl.glColor3d(0, 0, 0);
 				gl.glLineWidth(2);
+				if ( x == 0 )
+					gl.glLineWidth(4);
 			} else {
 				gl.glColor3d(.7, .75, .7);
 				gl.glLineWidth(1);
@@ -339,6 +384,8 @@ public class Display extends JPanel implements GLEventListener {
 			if (y % 10 == 0) {
 				gl.glColor3d(0, 0, 0);
 				gl.glLineWidth(2);
+				if ( y == 0 )
+					gl.glLineWidth(4);
 			} else {
 				gl.glColor3d(.7, .75, .7);
 				gl.glLineWidth(1);

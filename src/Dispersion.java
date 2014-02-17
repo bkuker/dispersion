@@ -72,7 +72,7 @@ public class Dispersion {
 		Databases.fakeMethod();
 
 		JFrame f = new JFrame();
-		f.setSize(640, 480);
+		f.setSize(1024, 768);
 		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		Display d = new Display();
 		f.setContentPane(d);
@@ -84,24 +84,22 @@ public class Dispersion {
 
 		Random r = new Random(0);
 
-		for (int i = 0; i < 7; i++) {
+		for (int i = 0; i < 10000; i++) {
 			OpenRocketDocument doc = orig.copy();
+			Simulation s = doc.getSimulation(1).copy();
 
-			new MassMutator(new Gaussian(new Gaussian(0.0, 0.20), 0.5)).mutate(doc.getRocket());
+			new MassMutator(new Gaussian(new Gaussian(0.0, 0.05), 0.05)).mutate(doc.getRocket());
 
-			new ParachuteFailure(new Odds(.10)).mutate(doc.getRocket());
+			new ParachuteFailure(new Odds(.05)).mutate(doc.getRocket());
 			
-			
-
-			Simulation s = doc.getSimulation(0).copy();
-			
-			new RodAngleMutator(new Gaussian(0.2), new Gaussian(0.8)).mutate(s.getOptions());
+			new RodAngleMutator(new Gaussian(0.05), new Gaussian(0.1)).mutate(s.getOptions());
 
 			s.getOptions().setRandomSeed(r.nextInt());
 			s.simulate();
 
 			d.addSimulation(s);
 
+			log.info("Sim #{}", i);
 			Thread.sleep(100);
 
 		}
