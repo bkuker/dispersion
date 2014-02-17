@@ -84,7 +84,7 @@ public class Dispersion {
 
 		Random r = new Random(0);
 
-		for (int i = 0; i < 1000; i++) {
+		for (int i = 0; i < 7; i++) {
 			OpenRocketDocument doc = orig.copy();
 
 			new MassMutator(new Gaussian(new Gaussian(0.0, 0.20), 0.5)).mutate(doc.getRocket());

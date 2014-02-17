@@ -51,12 +51,14 @@ public class Display extends JPanel implements GLEventListener {
 	private double viewDist = 100;
 
 	private final Collection<Simulation> simulations = new ConcurrentLinkedQueue<Simulation>();
+	Simulation highlighted;
 
 	GLU glu;
 	GLUquadric q;
 
 	public void addSimulation(final Simulation s) {
 		simulations.add(s);
+		highlighted = s;
 		repaint();
 	}
 
@@ -196,11 +198,11 @@ public class Display extends JPanel implements GLEventListener {
 
 	public void drawSimulations(final GLAutoDrawable drawable) {
 		for (final Simulation s : simulations) {
-			drawSimulation(s, drawable);
+			drawSimulation(s, s == highlighted, drawable);
 		}
 	}
 
-	public void drawSimulation(final Simulation s, final GLAutoDrawable drawable) {
+	public void drawSimulation(final Simulation s, final boolean highlight, final GLAutoDrawable drawable) {
 		GL2 gl = drawable.getGL().getGL2();
 
 		FlightDataBranch b = s.getSimulatedData().getBranch(0);
@@ -231,6 +233,26 @@ public class Display extends JPanel implements GLEventListener {
 			gl.glVertex3d(x.get(i), y.get(i), z.get(i));
 		}
 		gl.glEnd();
+
+		if (highlight) {
+			gl.glEnable(GL.GL_BLEND);
+			gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
+			gl.glColor4d(0, 0, 0, .3);
+			gl.glBegin(GL.GL_TRIANGLE_STRIP);
+			for (int i = 0; i < n; i++) {
+				gl.glVertex3d(x.get(i), y.get(i), z.get(i));
+				gl.glVertex3d(x.get(i), y.get(i), 0);
+			}
+			gl.glEnd();
+			gl.glBegin(GL.GL_LINES);
+			for (int i = 0; i < n; i++) {
+				if (i % 5 == 0) {
+					gl.glVertex3d(x.get(i), y.get(i), z.get(i));
+					gl.glVertex3d(x.get(i), y.get(i), 0);
+				}
+			}
+			gl.glEnd();
+		}
 
 		if (vz.get(n - 1) < -10) {
 			gl.glColor3d(1, 0, 0);
