@@ -2,26 +2,20 @@ package variables;
 
 import java.util.Random;
 
-public class Gaussian extends Number {
-
+public class Uniform extends Number {
 	private static final long serialVersionUID = 1L;
 	private static final Random r = new Random(0);
-	private final Number mean;
-	private final Number stddev;
+	private final Number min;
+	private final Number max;
 
-	public Gaussian(final Number mean, final Number stddev) {
-		this.mean = mean;
-		this.stddev = stddev;
-	}
-
-	public Gaussian(final Number stddev) {
-		this.mean = 0;
-		this.stddev = stddev;
+	public Uniform(final Number min, final Number max) {
+		this.min = min;
+		this.max = max;
 	}
 
 	@Override
 	public double doubleValue() {
-		return mean.doubleValue() + r.nextGaussian() * stddev.doubleValue();
+		return r.nextDouble() * (max.doubleValue() - min.doubleValue()) + min.doubleValue();
 	}
 
 	@Override
@@ -38,5 +32,4 @@ public class Gaussian extends Number {
 	public long longValue() {
 		return (long) doubleValue();
 	}
-
 }
