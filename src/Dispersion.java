@@ -79,12 +79,12 @@ public class Dispersion {
 		f.setVisible(true);
 
 		GeneralRocketLoader grl = new GeneralRocketLoader(new File(
-				"/Users/bkuker/git/openrocket/swing/resources/datafiles/examples/A simple model rocket.ork"));
+				"/Users/bkuker/git/openrocket/swing/resources/datafiles/examples/Three-stage rocket.ork"));
 		final OpenRocketDocument orig = grl.load();
 
 		Random r = new Random(0);
 
-		for (int i = 0; i < 10000; i++) {
+		for (int i = 0; i < 1; i++) {
 			OpenRocketDocument doc = orig.copy();
 			Simulation s = doc.getSimulation(1).copy();
 
@@ -93,6 +93,9 @@ public class Dispersion {
 			new ParachuteFailure(new Odds(.05)).mutate(doc.getRocket());
 			
 			new RodAngleMutator(new Gaussian(0.05), new Gaussian(0.1)).mutate(s.getOptions());
+			
+			s.getOptions().setLaunchRodAngle(.01);
+			s.getOptions().setLaunchRodDirection(1.3);
 
 			s.getOptions().setRandomSeed(r.nextInt());
 			s.simulate();

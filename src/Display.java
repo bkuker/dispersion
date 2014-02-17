@@ -255,7 +255,14 @@ public class Display extends JPanel implements GLEventListener {
 	public void drawSimulation(final Simulation s, final boolean highlight, final double a,
 			final GLAutoDrawable drawable) {
 
-		FlightDataBranch b = s.getSimulatedData().getBranch(0);
+		for (int b = 0; b < s.getSimulatedData().getBranchCount(); b++) {
+			drawBranch(s.getSimulatedData().getBranch(b), false, a, drawable);
+		}
+
+	}
+
+	public void drawBranch(final FlightDataBranch b, final boolean highlight, final double a,
+			final GLAutoDrawable drawable) {
 		int n = b.getLength();
 		List<Double> x = b.get(FlightDataType.TYPE_POSITION_X);
 		List<Double> y = b.get(FlightDataType.TYPE_POSITION_Y);
@@ -285,7 +292,8 @@ public class Display extends JPanel implements GLEventListener {
 		gl.glEnd();
 
 		if (highlight) {
-			gl.glColor4d(0, 0, 0, .3);
+			gl.glLineWidth(1);
+			gl.glColor4d(0, 0, 0, .15);
 			gl.glBegin(GL.GL_TRIANGLE_STRIP);
 			for (int i = 0; i < n; i++) {
 				gl.glVertex3d(x.get(i), y.get(i), z.get(i));
@@ -294,14 +302,13 @@ public class Display extends JPanel implements GLEventListener {
 			gl.glEnd();
 			gl.glBegin(GL.GL_LINES);
 			for (int i = 0; i < n; i++) {
-				if (i % 5 == 0) {
+				if (i % 20 == 0) {
 					gl.glVertex3d(x.get(i), y.get(i), z.get(i));
 					gl.glVertex3d(x.get(i), y.get(i), 0);
 				}
 			}
 			gl.glEnd();
 		}
-
 	}
 
 	public void drawPoints(final GLAutoDrawable drawable) {
