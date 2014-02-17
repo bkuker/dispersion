@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="con" path="org.apache.ivyde.eclipse.cpcontainer.IVYDE_CONTAINER/?project=Dispersion&amp;ivyXmlPath=ivy.xml&amp;confs=*"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/OpenRocket Core"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/OpenRocket Swing"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
