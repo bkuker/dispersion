@@ -13,6 +13,10 @@ public class RodAngleMutator implements SimulationOptionsMutator {
 	}
 	@Override
 	public void mutate(SimulationOptions op) {
+		//TODO CRITICAL This is usless and incorrect
+		//this code not reasonable when the rod is pointed nearly straight up,
+		//because the area it varies the angle in becomes wedge shaped.
+		
 		op.setLaunchRodAngle(op.getLaunchRodAngle() + dAngle.doubleValue());
 		op.setLaunchRodDirection(op.getLaunchRodDirection() + dDirection.doubleValue());
 	}
