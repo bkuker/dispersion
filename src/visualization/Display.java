@@ -1,3 +1,5 @@
+package visualization;
+
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Rectangle;
@@ -32,6 +34,8 @@ import net.sf.openrocket.util.MathUtil;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import analysys.Density;
 
 public class Display extends JPanel implements GLEventListener {
 	private static final long serialVersionUID = 1L;
@@ -87,7 +91,7 @@ public class Display extends JPanel implements GLEventListener {
 		repaint();
 	}
 
-	Display() {
+	public Display() {
 		this.setLayout(new BorderLayout());
 		initGLCanvas();
 		setupMouseListeners();

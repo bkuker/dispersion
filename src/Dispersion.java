@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import variables.Gaussian;
 import variables.Odds;
 import variables.Uniform;
+import visualization.Display;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
