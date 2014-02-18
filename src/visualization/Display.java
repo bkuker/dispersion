@@ -35,7 +35,7 @@ import net.sf.openrocket.util.MathUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import analysys.Density;
+import analysys.BeastKDEDensity;
 
 public class Display extends JPanel implements GLEventListener {
 	private static final long serialVersionUID = 1L;
@@ -65,7 +65,7 @@ public class Display extends JPanel implements GLEventListener {
 	GLU glu;
 	GLUquadric q;
 	
-	private final Density d = new Density();
+	private final BeastKDEDensity d = new BeastKDEDensity();
 
 	public void addSimulation(final Simulation s) {
 		simulations.offer(s);

@@ -1,70 +1,30 @@
 package analysys;
-import java.util.Collection;
-import java.util.Vector;
-
-import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
-import javax.media.opengl.GLAutoDrawable;
 
 import net.sf.openrocket.util.Coordinate;
-import dr.geo.KernelDensityEstimator2D;
-import dr.geo.contouring.ContourPath;
 
-public class Density {
+public interface Density {
+	public static double ONE_SIGMA = .68268949;
+	public static double TWO_SIGMA = .954499736;
+	public static double THREE_SIGMA = .997300204;
 
-	private static Collection<Coordinate> points = new Vector<Coordinate>();
-	private KernelDensityEstimator2D kde;
+	public void add(Coordinate c);
 
-	ContourPath c90[] = null, c99[] = null, c9999[] = null;
+	public Iterable<Path> getPaths(double mass);
 
-	public synchronized void add(Coordinate c) {
-		points.add(c);
-		getKDE();
+	public static interface Path {
+		public static final int SEG_CLOSE = 4;
+		public static final int SEG_LINETO = 1;
+		public static final int WIND_EVEN_ODD = 0;
+		public static final int WIND_NON_ZERO = 1;
+
+		public int currentSegment(double[] coords);
+
+		public int currentSegment(float[] coords);
+
+		public int getWindingRule();
+
+		public boolean isDone();
+
+		public void next();
 	}
-
-	private synchronized void getKDE() {
-		if (!points.isEmpty()) {
-			double x[] = new double[points.size()];
-			double y[] = new double[points.size()];
-			int i = 0;
-			for (Coordinate c : points) {
-				x[i] = c.x;
-				y[i] = c.y;
-				i++;
-			}
-			kde = new KernelDensityEstimator2D(x, y, new double[] { 5, 5 }, 30, null);
-
-			c90 = kde.getContourPaths(.90);
-			c99 = kde.getContourPaths(.99);
-			c9999 = kde.getContourPaths(.9999);
-		}
-	}
-
-	public synchronized void draw(final GLAutoDrawable drawable) {
-		GL2 gl = drawable.getGL().getGL2();
-		gl.glColor3d(1, 0, 0);
-		draw(drawable, c90);
-		gl.glColor3d(1, .5, 0);
-		draw(drawable, c99);
-		gl.glColor3d(1, 1, 0);
-		draw(drawable, c9999);
-	}
-
-	public synchronized void draw(final GLAutoDrawable drawable, ContourPath[] paths) {
-		if (paths == null)
-			return;
-		GL2 gl = drawable.getGL().getGL2();
-
-		for (ContourPath cp : paths) {
-			double x[] = cp.getAllX();
-			double y[] = cp.getAllY();
-			gl.glLineWidth(3);
-			gl.glBegin(GL.GL_LINE_LOOP);
-			for (int i = 0; i < x.length; i++) {
-				gl.glVertex3d(x[i], y[i], .1);
-			}
-			gl.glEnd();
-		}
-	}
-
 }

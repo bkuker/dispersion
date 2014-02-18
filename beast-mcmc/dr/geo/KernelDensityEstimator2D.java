@@ -192,7 +192,7 @@ public class KernelDensityEstimator2D implements ContourMaker {
         return seq;
     }
 
-    private double margin = 0.7;
+    private double margin = 2;
 
     private void setupLims() {
         lims = new double[4];

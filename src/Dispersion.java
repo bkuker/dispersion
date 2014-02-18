@@ -85,7 +85,7 @@ public class Dispersion {
 
 		Random r = new Random(0);
 
-		for (int i = 0; i < 750; i++) {
+		for (int i = 0; i < 2000; i++) {
 			OpenRocketDocument doc = orig.copy();
 			Simulation s = doc.getSimulation(1).copy();
 
