@@ -53,7 +53,6 @@ public class PathRenderer {
 			@Override
 			public void vertex(Object vertexData) {
 				double d[] = (double[]) vertexData;
-				log.debug("{}", d);
 				gl.glVertex3dv(d, 0);
 			}
 
