@@ -9,6 +9,6 @@ public class Odds {
 	}
 
 	public boolean occurs() {
-		return Rando.nextDouble() <= pct;
+		return Variable.r.nextDouble() <= pct;
 	}
 }

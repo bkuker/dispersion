@@ -1,6 +1,6 @@
 package variables;
 
-public class Uniform extends Number {
+public class Uniform extends Variable {
 	private static final long serialVersionUID = 1L;
 	private final Number min;
 	private final Number max;
@@ -12,21 +12,7 @@ public class Uniform extends Number {
 
 	@Override
 	public double doubleValue() {
-		return Rando.nextDouble() * (max.doubleValue() - min.doubleValue()) + min.doubleValue();
+		return r.nextDouble() * (max.doubleValue() - min.doubleValue()) + min.doubleValue();
 	}
 
-	@Override
-	public float floatValue() {
-		return (float) doubleValue();
-	}
-
-	@Override
-	public int intValue() {
-		return (int) doubleValue();
-	}
-
-	@Override
-	public long longValue() {
-		return (long) doubleValue();
-	}
 }

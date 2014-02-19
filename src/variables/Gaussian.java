@@ -1,7 +1,6 @@
 package variables;
 
-
-public class Gaussian extends Number {
+public class Gaussian extends Variable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -20,22 +19,7 @@ public class Gaussian extends Number {
 
 	@Override
 	public double doubleValue() {
-		return mean.doubleValue() + Rando.nextGaussian() * stddev.doubleValue();
-	}
-
-	@Override
-	public float floatValue() {
-		return (float) doubleValue();
-	}
-
-	@Override
-	public int intValue() {
-		return (int) doubleValue();
-	}
-
-	@Override
-	public long longValue() {
-		return (long) doubleValue();
+		return mean.doubleValue() + r.nextGaussian() * stddev.doubleValue();
 	}
 
 }
