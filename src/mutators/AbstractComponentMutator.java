@@ -2,7 +2,7 @@ package mutators;
 import net.sf.openrocket.rocketcomponent.Rocket;
 import net.sf.openrocket.rocketcomponent.RocketComponent;
 
-public abstract class AbstractComponentMutator {
+public abstract class AbstractComponentMutator implements RocketMutator {
 	public void mutate(Rocket r) {
 		traverse(r);
 	}
