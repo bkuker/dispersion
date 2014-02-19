@@ -1,5 +1,7 @@
 package analysys;
 
+import java.awt.geom.PathIterator;
+
 import net.sf.openrocket.util.Coordinate;
 
 public interface Density {
@@ -12,19 +14,6 @@ public interface Density {
 	public Iterable<Path> getPaths(double mass);
 
 	public static interface Path {
-		public static final int SEG_CLOSE = 4;
-		public static final int SEG_LINETO = 1;
-		public static final int WIND_EVEN_ODD = 0;
-		public static final int WIND_NON_ZERO = 1;
-
-		public int currentSegment(double[] coords);
-
-		public int currentSegment(float[] coords);
-
-		public int getWindingRule();
-
-		public boolean isDone();
-
-		public void next();
+		public PathIterator getPathIterator();
 	}
 }

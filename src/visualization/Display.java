@@ -64,7 +64,7 @@ public class Display extends JPanel implements GLEventListener {
 	GL2 gl;
 	GLU glu;
 	GLUquadric q;
-	
+
 	private final BeastKDEDensity d = new BeastKDEDensity();
 
 	public void addSimulation(final Simulation s) {
@@ -237,19 +237,19 @@ public class Display extends JPanel implements GLEventListener {
 		gl.glEnable(GL2.GL_FOG);
 
 		drawGroundGrid(drawable);
+		gl.glDisable(GL.GL_DEPTH_TEST);
+		new DensityRenderer().draw(drawable, d);
+		gl.glEnable(GL.GL_DEPTH_TEST);
 
 		gl.glDisable(GL2.GL_FOG);
 
 		drawUpArrow(drawable);
-		
+
 		drawPoints(drawable);
 
-		d.draw(drawable);
-		
 		if (viewAlt < 89)
 			drawSimulations(drawable);
-		
-		
+
 		gl = null;
 	}
 
@@ -303,8 +303,8 @@ public class Display extends JPanel implements GLEventListener {
 			} else {
 				double t = thrust.get(i);
 				if (t > 0) {
-					double c =t / maxThrust + .3;
-					gl.glColor4d(c, .8*c, 0, a);
+					double c = t / maxThrust + .3;
+					gl.glColor4d(c, .8 * c, 0, a);
 				} else {
 					gl.glColor4d(0, 0, 0, a);
 				}
