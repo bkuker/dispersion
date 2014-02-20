@@ -1,10 +1,12 @@
+package com.billkuker.rocketry.dispersion.core;
 import java.util.List;
 import java.util.Random;
 import java.util.Vector;
 
-import mutators.Mutator;
-import mutators.RocketMutator;
-import mutators.SimulationOptionsMutator;
+import com.billkuker.rocketry.dispersion.core.mutators.Mutator;
+import com.billkuker.rocketry.dispersion.core.mutators.RocketMutator;
+import com.billkuker.rocketry.dispersion.core.mutators.SimulationOptionsMutator;
+
 import net.sf.openrocket.document.OpenRocketDocument;
 import net.sf.openrocket.document.Simulation;
 import net.sf.openrocket.simulation.exception.SimulationException;

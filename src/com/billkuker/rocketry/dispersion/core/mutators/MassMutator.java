@@ -1,4 +1,4 @@
-package mutators;
+package com.billkuker.rocketry.dispersion.core.mutators;
 import net.sf.openrocket.rocketcomponent.RocketComponent;
 
 import org.slf4j.Logger;

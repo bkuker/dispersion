@@ -1,4 +1,4 @@
-package visualization;
+package com.billkuker.rocketry.dispersion.vizualization;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -35,7 +35,8 @@ import net.sf.openrocket.util.MathUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import analysys.BeastKDEDensity;
+import com.billkuker.rocketry.dispersion.analysys.BeastKDEDensity;
+
 
 public class Display extends JPanel implements GLEventListener {
 	private static final long serialVersionUID = 1L;

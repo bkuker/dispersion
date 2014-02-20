@@ -1,4 +1,4 @@
-package variables;
+package com.billkuker.rocketry.dispersion.core.variables;
 
 import java.util.Map;
 import java.util.Random;

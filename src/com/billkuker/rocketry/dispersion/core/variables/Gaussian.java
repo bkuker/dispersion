@@ -1,4 +1,4 @@
-package variables;
+package com.billkuker.rocketry.dispersion.core.variables;
 
 public class Gaussian extends Variable {
 

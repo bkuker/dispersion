@@ -1,4 +1,4 @@
-package visualization;
+package com.billkuker.rocketry.dispersion.vizualization;
 
 import java.awt.geom.PathIterator;
 
@@ -13,7 +13,8 @@ import javax.media.opengl.glu.GLUtessellatorCallbackAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import analysys.Density.Path;
+import com.billkuker.rocketry.dispersion.analysys.Density.Path;
+
 
 public class PathRenderer {
 

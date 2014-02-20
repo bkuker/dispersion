@@ -1,12 +1,10 @@
+package com.billkuker.rocketry.dispersion;
+
 import java.io.File;
 import java.util.Vector;
 
 import javax.swing.JFrame;
 
-import mutators.MassMutator;
-import mutators.Mutator;
-import mutators.ParachuteFailure;
-import mutators.RodAngleMutator;
 import net.sf.openrocket.database.Databases;
 import net.sf.openrocket.document.OpenRocketDocument;
 import net.sf.openrocket.file.GeneralRocketLoader;
@@ -20,11 +18,19 @@ import net.sf.openrocket.startup.GuiModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import variables.Gaussian;
-import variables.Odds;
-import variables.Uniform;
-import visualization.Display;
 
+
+import com.billkuker.rocketry.dispersion.core.Engine;
+import com.billkuker.rocketry.dispersion.core.Engine.Sim;
+import com.billkuker.rocketry.dispersion.core.Engine.SimListener;
+import com.billkuker.rocketry.dispersion.core.mutators.MassMutator;
+import com.billkuker.rocketry.dispersion.core.mutators.Mutator;
+import com.billkuker.rocketry.dispersion.core.mutators.ParachuteFailure;
+import com.billkuker.rocketry.dispersion.core.mutators.RodAngleMutator;
+import com.billkuker.rocketry.dispersion.core.variables.Gaussian;
+import com.billkuker.rocketry.dispersion.core.variables.Odds;
+import com.billkuker.rocketry.dispersion.core.variables.Uniform;
+import com.billkuker.rocketry.dispersion.vizualization.Display;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;

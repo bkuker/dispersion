@@ -1,10 +1,11 @@
-package visualization;
+package com.billkuker.rocketry.dispersion.vizualization;
 
 import javax.media.opengl.GL2;
 import javax.media.opengl.GLAutoDrawable;
 
-import analysys.Density;
-import analysys.Density.Path;
+import com.billkuker.rocketry.dispersion.analysys.Density;
+import com.billkuker.rocketry.dispersion.analysys.Density.Path;
+
 
 public class DensityRenderer extends PathRenderer {
 

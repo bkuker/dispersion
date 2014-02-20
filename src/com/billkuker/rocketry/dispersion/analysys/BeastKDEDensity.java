@@ -1,4 +1,4 @@
-package analysys;
+package com.billkuker.rocketry.dispersion.analysys;
 
 import java.awt.geom.PathIterator;
 import java.util.Collection;
