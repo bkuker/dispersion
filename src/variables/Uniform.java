@@ -12,7 +12,7 @@ public class Uniform extends Variable {
 
 	@Override
 	public double doubleValue() {
-		return r.nextDouble() * (max.doubleValue() - min.doubleValue()) + min.doubleValue();
+		return randomDouble() * (max.doubleValue() - min.doubleValue()) + min.doubleValue();
 	}
 
 }

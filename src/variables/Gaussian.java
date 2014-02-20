@@ -19,7 +19,7 @@ public class Gaussian extends Variable {
 
 	@Override
 	public double doubleValue() {
-		return mean.doubleValue() + r.nextGaussian() * stddev.doubleValue();
+		return mean.doubleValue() + randomGaussian() * stddev.doubleValue();
 	}
 
 }

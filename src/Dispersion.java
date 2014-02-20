@@ -1,14 +1,14 @@
 import java.io.File;
-import java.util.Random;
+import java.util.Vector;
 
 import javax.swing.JFrame;
 
 import mutators.MassMutator;
+import mutators.Mutator;
 import mutators.ParachuteFailure;
 import mutators.RodAngleMutator;
 import net.sf.openrocket.database.Databases;
 import net.sf.openrocket.document.OpenRocketDocument;
-import net.sf.openrocket.document.Simulation;
 import net.sf.openrocket.file.GeneralRocketLoader;
 import net.sf.openrocket.gui.util.GUIUtil;
 import net.sf.openrocket.gui.util.SwingPreferences;
@@ -43,16 +43,6 @@ public class Dispersion {
 		LoggingSystemSetup.setupLoggingAppender();
 		LoggingSystemSetup.addConsoleAppender();
 
-		// RandomSeed.setSeed(0);
-
-		/*
-		 * Setup the uncaught exception handler
-		 * log.info("Registering exception handler"); SwingExceptionHandler
-		 * exceptionHandler = new SwingExceptionHandler();
-		 * Application.setExceptionHandler(exceptionHandler);
-		 * exceptionHandler.registerExceptionHandler();
-		 */
-
 		// Load motors etc.
 		log.info("Loading databases");
 
@@ -71,37 +61,37 @@ public class Dispersion {
 		((SwingPreferences) Application.getPreferences()).loadDefaultUnits();
 
 		Databases.fakeMethod();
+		
+		
+		//Set up GUI
 
 		JFrame f = new JFrame();
 		f.setSize(1024, 768);
 		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		Display d = new Display();
+		final Display d = new Display();
 		f.setContentPane(d);
 		f.setVisible(true);
 
+		//Load a model
 		GeneralRocketLoader grl = new GeneralRocketLoader(new File(
 				"/Users/bkuker/git/openrocket/swing/resources/datafiles/examples/A simple model rocket.ork"));
 		final OpenRocketDocument orig = grl.load();
 
-		Random r = new Random(0);
+		
+		//Set up Mutators
+		Vector<Mutator> m = new Vector<Mutator>();
+		m.add(new MassMutator(new Gaussian(new Gaussian(0.0, 0.05), 0.05)));
+		m.add(new ParachuteFailure(new Odds(.1)));
+		m.add(new RodAngleMutator(new Gaussian(0.04), new Uniform(-Math.PI, Math.PI)));
 
-		for (int i = 0; i < 2000; i++) {
-			OpenRocketDocument doc = orig.copy();
-			Simulation s = doc.getSimulation(1).copy();
-
-			new MassMutator(new Gaussian(new Gaussian(0.0, 0.05), 0.05)).mutate(doc.getRocket());
-			new ParachuteFailure(new Odds(.1)).mutate(doc.getRocket());
-			new RodAngleMutator(new Gaussian(0.04), new Uniform(-Math.PI, Math.PI)).mutate(s.getOptions());
-
-			s.getOptions().setRandomSeed(r.nextInt());
-			s.simulate();
-
-			d.addSimulation(s);
-
-			log.info("Sim #{}", i);
-			Thread.sleep(100);
-
-		}
-
+		//Run it!
+		Engine e = new Engine(orig, 1, m);
+		e.addSimListener(new Engine.SimListener() {
+			@Override
+			public void simComplete(Engine.Sim s) {
+				d.addSimulation(s.getSimulation());
+			}
+		});
+		e.run(10);
 	}
 }
