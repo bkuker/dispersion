@@ -18,11 +18,8 @@ import net.sf.openrocket.startup.GuiModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
-
 import com.billkuker.rocketry.dispersion.core.Engine;
-import com.billkuker.rocketry.dispersion.core.Engine.Sim;
-import com.billkuker.rocketry.dispersion.core.Engine.SimListener;
+import com.billkuker.rocketry.dispersion.core.Sample;
 import com.billkuker.rocketry.dispersion.core.mutators.MassMutator;
 import com.billkuker.rocketry.dispersion.core.mutators.Mutator;
 import com.billkuker.rocketry.dispersion.core.mutators.ParachuteFailure;
@@ -67,9 +64,8 @@ public class Dispersion {
 		((SwingPreferences) Application.getPreferences()).loadDefaultUnits();
 
 		Databases.fakeMethod();
-		
-		
-		//Set up GUI
+
+		// Set up GUI
 
 		JFrame f = new JFrame();
 		f.setSize(1024, 768);
@@ -78,23 +74,22 @@ public class Dispersion {
 		f.setContentPane(d);
 		f.setVisible(true);
 
-		//Load a model
+		// Load a model
 		GeneralRocketLoader grl = new GeneralRocketLoader(new File(
 				"/Users/bkuker/git/openrocket/swing/resources/datafiles/examples/A simple model rocket.ork"));
 		final OpenRocketDocument orig = grl.load();
 
-		
-		//Set up Mutators
+		// Set up Mutators
 		Vector<Mutator> m = new Vector<Mutator>();
 		m.add(new MassMutator(new Gaussian(new Gaussian(0.0, 0.05), 0.05)));
 		m.add(new ParachuteFailure(new Odds(.1)));
 		m.add(new RodAngleMutator(new Gaussian(0.04), new Uniform(-Math.PI, Math.PI)));
 
-		//Run it!
+		// Run it!
 		Engine e = new Engine(orig, 1, m);
-		e.addSimListener(new Engine.SimListener() {
+		e.addSimListener(new Engine.SampleListener() {
 			@Override
-			public void simComplete(Engine.Sim s) {
+			public void sampleSimulationComplete(Sample s) {
 				d.addSimulation(s.getSimulation());
 			}
 		});

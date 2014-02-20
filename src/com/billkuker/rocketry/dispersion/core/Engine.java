@@ -1,38 +1,27 @@
 package com.billkuker.rocketry.dispersion.core;
+
 import java.util.List;
 import java.util.Random;
 import java.util.Vector;
-
-import com.billkuker.rocketry.dispersion.core.mutators.Mutator;
-import com.billkuker.rocketry.dispersion.core.mutators.RocketMutator;
-import com.billkuker.rocketry.dispersion.core.mutators.SimulationOptionsMutator;
 
 import net.sf.openrocket.document.OpenRocketDocument;
 import net.sf.openrocket.document.Simulation;
 import net.sf.openrocket.simulation.exception.SimulationException;
 
+import com.billkuker.rocketry.dispersion.core.mutators.Mutator;
+import com.billkuker.rocketry.dispersion.core.mutators.RocketMutator;
+import com.billkuker.rocketry.dispersion.core.mutators.SimulationOptionsMutator;
+
 public class Engine {
 	final OpenRocketDocument doc;
 	final int simulationNumber;
 	final List<Mutator> mutators;
-	final List<SimListener> simListeners = new Vector<SimListener>();
+	final List<SampleListener> sampleListeners = new Vector<SampleListener>();
 
 	Random r = new Random(0);
 
-	public class Sim {
-		private final Simulation s;
-
-		Sim(final Simulation s) {
-			this.s = s;
-		}
-
-		public Simulation getSimulation() {
-			return s;
-		}
-	}
-
-	public interface SimListener {
-		public void simComplete(Sim s);
+	public interface SampleListener {
+		public void sampleSimulationComplete(Sample s);
 	}
 
 	public Engine(final OpenRocketDocument doc, final int simulationNumber, final List<Mutator> mutators) {
@@ -41,8 +30,8 @@ public class Engine {
 		this.mutators = mutators;
 	}
 
-	public void addSimListener(final SimListener l) {
-		simListeners.add(l);
+	public void addSimListener(final SampleListener l) {
+		sampleListeners.add(l);
 	}
 
 	public void run(final int iterations) throws SimulationException {
@@ -64,10 +53,10 @@ public class Engine {
 
 			s.simulate();
 
-			Sim sim = new Sim(s);
+			Sample sim = new Sample(s);
 
-			for (SimListener l : simListeners)
-				l.simComplete(sim);
+			for (SampleListener l : sampleListeners)
+				l.sampleSimulationComplete(sim);
 		}
 	}
 }

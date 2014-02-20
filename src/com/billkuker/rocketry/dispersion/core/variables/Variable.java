@@ -14,18 +14,18 @@ public abstract class Variable extends Number {
 			((Variable) n).setName(name);
 		}
 	}
-	
-	private static ThreadLocal<Map<String, Double>> values = new ThreadLocal<Map<String,Double>>();
-	
-	public void setVariableValueMap(Map<String, Double> map){
-		
+
+	private static ThreadLocal<Map<String, Double>> values = new ThreadLocal<Map<String, Double>>();
+
+	public void setVariableValueMap(Map<String, Double> map) {
+
 	}
-	
-	protected double randomDouble(){
+
+	protected double randomDouble() {
 		return r.nextDouble();
 	}
-	
-	protected double randomGaussian(){
+
+	protected double randomGaussian() {
 		return r.nextDouble();
 	}
 

@@ -37,7 +37,6 @@ import org.slf4j.LoggerFactory;
 
 import com.billkuker.rocketry.dispersion.analysys.BeastKDEDensity;
 
-
 public class Display extends JPanel implements GLEventListener {
 	private static final long serialVersionUID = 1L;
 	private static final Logger log = LoggerFactory.getLogger(Display.class);

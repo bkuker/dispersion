@@ -15,19 +15,18 @@ import org.slf4j.LoggerFactory;
 
 import com.billkuker.rocketry.dispersion.analysys.Density.Path;
 
-
 public class PathRenderer {
 
 	private static final Logger log = LoggerFactory.getLogger(PathRenderer.class);
 
 	private GLUtessellator tobj = GLU.gluNewTess();
-	
+
 	public synchronized void fill(final GLAutoDrawable drawable, Iterable<Path> paths) {
 		for (Path p : paths) {
 			fill(drawable, p);
 		}
 	}
-	
+
 	public synchronized void outline(final GLAutoDrawable drawable, Iterable<Path> paths) {
 		for (Path p : paths) {
 			outline(drawable, p);

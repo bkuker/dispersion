@@ -1,9 +1,9 @@
 package com.billkuker.rocketry.dispersion.core.mutators;
+
 import net.sf.openrocket.rocketcomponent.RocketComponent;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 
 public class MassMutator extends AbstractComponentMutator {
 	private static final Logger log = LoggerFactory.getLogger(MassMutator.class);;
