@@ -10,14 +10,9 @@ import javax.media.opengl.glu.GLUtessellator;
 import javax.media.opengl.glu.GLUtessellatorCallback;
 import javax.media.opengl.glu.GLUtessellatorCallbackAdapter;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.billkuker.rocketry.dispersion.analysys.Density.Path;
 
 public class PathRenderer {
-
-	private static final Logger log = LoggerFactory.getLogger(PathRenderer.class);
 
 	private GLUtessellator tobj = GLU.gluNewTess();
 

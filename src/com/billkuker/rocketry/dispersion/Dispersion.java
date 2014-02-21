@@ -22,10 +22,8 @@ import com.billkuker.rocketry.dispersion.core.Engine;
 import com.billkuker.rocketry.dispersion.core.Sample;
 import com.billkuker.rocketry.dispersion.core.mutators.MassMutator;
 import com.billkuker.rocketry.dispersion.core.mutators.Mutator;
-import com.billkuker.rocketry.dispersion.core.mutators.ParachuteFailure;
 import com.billkuker.rocketry.dispersion.core.mutators.RodAngleMutator;
 import com.billkuker.rocketry.dispersion.core.variables.Gaussian;
-import com.billkuker.rocketry.dispersion.core.variables.Odds;
 import com.billkuker.rocketry.dispersion.core.variables.Uniform;
 import com.billkuker.rocketry.dispersion.vizualization.Display;
 import com.google.inject.Guice;
@@ -76,13 +74,13 @@ public class Dispersion {
 
 		// Load a model
 		GeneralRocketLoader grl = new GeneralRocketLoader(new File(
-				"/Users/bkuker/git/openrocket/swing/resources/datafiles/examples/A simple model rocket.ork"));
+				"/Users/bkuker/git/openrocket/swing/resources/datafiles/examples/Three-Stage rocket.ork"));
 		final OpenRocketDocument orig = grl.load();
 
 		// Set up Mutators
 		Vector<Mutator> m = new Vector<Mutator>();
 		m.add(new MassMutator(new Gaussian(new Gaussian(0.0, 0.05), 0.05)));
-		m.add(new ParachuteFailure(new Odds(.1)));
+		// m.add(new ParachuteFailure(new Odds(.1)));
 		m.add(new RodAngleMutator(new Gaussian(0.04), new Uniform(-Math.PI, Math.PI)));
 
 		// Run it!
@@ -93,6 +91,6 @@ public class Dispersion {
 				d.addSimulation(s.getSimulation());
 			}
 		});
-		e.run(10);
+		e.run(1000);
 	}
 }
