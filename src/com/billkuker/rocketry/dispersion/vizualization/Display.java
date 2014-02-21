@@ -6,6 +6,7 @@ import java.awt.Component;
 import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
+import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
 import java.util.Queue;
@@ -51,6 +52,25 @@ public class Display extends JPanel implements GLEventListener {
 		JPopupMenu.setDefaultLightWeightPopupEnabled(false);
 	}
 
+	static Method color;
+	static {
+		try {
+			color = EventGraphics.class.getDeclaredMethod("getEventColor",
+					FlightEvent.Type.class);
+		} catch (Exception e) {
+			throw new Error(e);
+		}
+		color.setAccessible(true);
+	}
+
+	static Color getEventColor(FlightEvent.Type t) {
+		try {
+			return (Color) color.invoke(null, t);
+		} catch (Exception e) {
+			throw new Error(e);
+		}
+	}
+
 	private Component canvas;
 	private double ratio;
 
@@ -81,7 +101,8 @@ public class Display extends JPanel implements GLEventListener {
 		for (int bi = 0; bi < s.getSimulatedData().getBranchCount(); bi++) {
 			FlightDataBranch b = s.getSimulatedData().getBranch(bi);
 
-			final Coordinate c = new Coordinate(b.getLast(FlightDataType.TYPE_POSITION_X),
+			final Coordinate c = new Coordinate(
+					b.getLast(FlightDataType.TYPE_POSITION_X),
 					b.getLast(FlightDataType.TYPE_POSITION_Y), 0);
 			final double vz = b.getLast(FlightDataType.TYPE_VELOCITY_Z);
 
@@ -118,7 +139,8 @@ public class Display extends JPanel implements GLEventListener {
 		} catch (Throwable t) {
 			log.error("An error occurred creating 3d View", t);
 			canvas = null;
-			this.add(new JLabel("Unable to load 3d Libraries: " + t.getMessage()));
+			this.add(new JLabel("Unable to load 3d Libraries: "
+					+ t.getMessage()));
 		}
 	}
 
@@ -267,8 +289,8 @@ public class Display extends JPanel implements GLEventListener {
 		// gl.glDepthMask(true);
 	}
 
-	public void drawSimulation(final Simulation s, final boolean highlight, final double a,
-			final GLAutoDrawable drawable) {
+	public void drawSimulation(final Simulation s, final boolean highlight,
+			final double a, final GLAutoDrawable drawable) {
 
 		for (int b = 0; b < s.getSimulatedData().getBranchCount(); b++) {
 			drawBranch(s.getSimulatedData().getBranch(b), false, a, drawable);
@@ -276,8 +298,8 @@ public class Display extends JPanel implements GLEventListener {
 
 	}
 
-	public void drawBranch(final FlightDataBranch b, final boolean highlight, final double a,
-			final GLAutoDrawable drawable) {
+	public void drawBranch(final FlightDataBranch b, final boolean highlight,
+			final double a, final GLAutoDrawable drawable) {
 		int n = b.getLength();
 		List<Double> t = b.get(FlightDataType.TYPE_TIME);
 		List<Double> x = b.get(FlightDataType.TYPE_POSITION_X);
@@ -288,13 +310,10 @@ public class Display extends JPanel implements GLEventListener {
 		List<Double> thrust = b.get(FlightDataType.TYPE_THRUST_FORCE);
 		double maxThrust = b.getMaximum(FlightDataType.TYPE_THRUST_FORCE);
 
-		/*if (simulations.size() < 10)
-			gl.glLineWidth(3);
-		else if (simulations.size() < 100)
-			gl.glLineWidth(2);
-		else
-			gl.glLineWidth(1);
-			*/
+		/*
+		 * if (simulations.size() < 10) gl.glLineWidth(3); else if
+		 * (simulations.size() < 100) gl.glLineWidth(2); else gl.glLineWidth(1);
+		 */
 		gl.glLineWidth(1);
 
 		gl.glBegin(GL.GL_LINE_STRIP);
@@ -344,8 +363,10 @@ public class Display extends JPanel implements GLEventListener {
 				while (events.get(0).getTime() < t.get(i)) {
 					FlightEvent e = events.remove(0);
 
-					Color color = EventGraphics.getEventColor(e.getType());
-					gl.glColor4d(color.getRed() / 255.0, color.getGreen() / 255.0, color.getBlue() / 255.0, 1);
+					Color color = getEventColor(e.getType());
+					gl.glColor4d(color.getRed() / 255.0,
+							color.getGreen() / 255.0, color.getBlue() / 255.0,
+							1);
 
 					gl.glPushMatrix();
 					gl.glTranslated(x.get(i), y.get(i), z.get(i));
@@ -468,7 +489,8 @@ public class Display extends JPanel implements GLEventListener {
 	}
 
 	@Override
-	public void reshape(final GLAutoDrawable drawable, final int x, final int y, final int w, final int h) {
+	public void reshape(final GLAutoDrawable drawable, final int x,
+			final int y, final int w, final int h) {
 		log.trace("GL - reshape()");
 		ratio = (double) w / (double) h;
 	}
