@@ -73,6 +73,7 @@ public class Display extends JPanel implements GLEventListener {
 		markTypes.add(FlightEvent.Type.STAGE_SEPARATION);
 		markTypes.add(FlightEvent.Type.APOGEE);
 		markTypes.add(FlightEvent.Type.EXCEPTION);
+		markTypes.add(FlightEvent.Type.IGNITION);
 	}
 
 	static {
@@ -346,6 +347,7 @@ public class Display extends JPanel implements GLEventListener {
 		gl.glBegin(GL.GL_LINE_STRIP);
 		List<FlightEvent> events = b.getEvents();
 		Collections.sort(events);
+		gl.glColor4d(0, 0, 0, 1);
 		for (int i = 0; i < n; i++) {
 			//If there is an event to consider
 			if (events.get(0).getTime() < t.get(i)) {
