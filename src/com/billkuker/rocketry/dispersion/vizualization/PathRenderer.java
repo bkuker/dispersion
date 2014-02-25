@@ -18,30 +18,34 @@ public class PathRenderer {
 
 	public synchronized void fill(final GLAutoDrawable drawable, Iterable<Path> paths) {
 		for (Path p : paths) {
-			fill(drawable, p);
+			fill(drawable, p.getPathIterator());
 		}
 	}
 
 	public synchronized void outline(final GLAutoDrawable drawable, Iterable<Path> paths) {
 		for (Path p : paths) {
-			outline(drawable, p);
+			outline(drawable, p.getPathIterator());
 		}
 	}
 
-	public synchronized void outline(final GLAutoDrawable drawable, Path path) {
+	public synchronized void outline(final GLAutoDrawable drawable, PathIterator pi) {
 		GL2 gl = drawable.getGL().getGL2();
 		gl.glBegin(GL.GL_LINE_LOOP);
 		double d[] = new double[] { 0, 0, 0 };
-		PathIterator pi = path.getPathIterator();
+		
 		while (!pi.isDone()) {
-			pi.currentSegment(d);
+			int type = pi.currentSegment(d);
+			if ( type == PathIterator.SEG_MOVETO){
+				gl.glEnd();
+				gl.glBegin(GL.GL_LINE_LOOP);
+			}
 			gl.glVertex3dv(d, 0);
 			pi.next();
 		}
 		gl.glEnd();
 	}
 
-	public synchronized void fill(final GLAutoDrawable drawable, Path path) {
+	public synchronized void fill(final GLAutoDrawable drawable, PathIterator pi) {
 		final GL2 gl = drawable.getGL().getGL2();
 
 		GLUtessellatorCallback cb = new GLUtessellatorCallbackAdapter() {
@@ -69,8 +73,6 @@ public class PathRenderer {
 		GLU.gluTessBeginPolygon(tobj, null);
 		GLU.gluTessBeginContour(tobj);
 		gl.glNormal3f(0, 0, 1);
-
-		PathIterator pi = path.getPathIterator();
 
 		while (!pi.isDone()) {
 			double d[] = new double[] { 0, 0, 0 };

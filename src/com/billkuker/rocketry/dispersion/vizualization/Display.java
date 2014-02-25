@@ -3,9 +3,15 @@ package com.billkuker.rocketry.dispersion.vizualization;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Font;
+import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.awt.Shape;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
+import java.awt.font.FontRenderContext;
+import java.awt.geom.FlatteningPathIterator;
+import java.awt.image.BufferedImage;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.HashMap;
@@ -340,25 +346,25 @@ public class Display extends JPanel implements GLEventListener {
 		else
 			gl.glLineWidth(1);
 
-		//A map of events to draw as markers and where to draw them
+		// A map of events to draw as markers and where to draw them
 		HashMap<FlightEvent, Coordinate> markEvents = new HashMap<FlightEvent, Coordinate>();
 
-		//Iterate through the flight path
+		// Iterate through the flight path
 		gl.glBegin(GL.GL_LINE_STRIP);
 		List<FlightEvent> events = b.getEvents();
 		Collections.sort(events);
 		gl.glColor4d(0, 0, 0, 1);
 		for (int i = 0; i < n; i++) {
-			//If there is an event to consider
+			// If there is an event to consider
 			if (events.get(0).getTime() < t.get(i)) {
 				FlightEvent e = events.remove(0);
 				if (trackColorTypes.contains(e.getType())) {
-					//Change the track color based on this event
+					// Change the track color based on this event
 					Color color = getEventColor(e.getType());
 					gl.glColor4d(color.getRed() / 255.0, color.getGreen() / 255.0, color.getBlue() / 255.0, 1);
 				}
 				if (markTypes.contains(e.getType())) {
-					//Note this even to mark later
+					// Note this even to mark later
 					markEvents.put(e, new Coordinate(x.get(i), y.get(i), z.get(i)));
 				}
 			}
@@ -366,7 +372,7 @@ public class Display extends JPanel implements GLEventListener {
 		}
 		gl.glEnd();
 
-		//Draw a marker for every event 
+		// Draw a marker for every event
 		for (Map.Entry<FlightEvent, Coordinate> e : markEvents.entrySet()) {
 			Color color = getEventColor(e.getKey().getType());
 			gl.glColor4d(color.getRed() / 255.0, color.getGreen() / 255.0, color.getBlue() / 255.0, 1);
@@ -375,8 +381,8 @@ public class Display extends JPanel implements GLEventListener {
 			glu.gluSphere(q, .006 * viewDist, 10, 10);
 			gl.glPopMatrix();
 		}
-		
-		//Optionally draw a curtain wall to highlight the ground track
+
+		// Optionally draw a curtain wall to highlight the ground track
 		if (highlight) {
 			gl.glLineWidth(1);
 			gl.glColor4d(0, 0, 0, .15);
@@ -395,7 +401,6 @@ public class Display extends JPanel implements GLEventListener {
 			}
 			gl.glEnd();
 		}
-
 
 	}
 
@@ -487,6 +492,41 @@ public class Display extends JPanel implements GLEventListener {
 			}
 			gl.glEnd();
 		}
+
+		gl.glLineWidth(2);
+
+		BufferedImage img = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
+		Graphics2D g2 = img.createGraphics();
+
+		FontRenderContext frc = g2.getFontRenderContext();
+		Font font = new Font("serif.bolditalic", Font.PLAIN, 12);
+		Shape shape;
+		FlatteningPathIterator fpi;
+
+		gl.glPushMatrix();
+		gl.glScaled(1, -1, 1);
+		gl.glTranslated(-50, -51, 0);
+		shape = font.createGlyphVector(frc, "100 m").getOutline();
+		fpi = new FlatteningPathIterator(shape.getPathIterator(null), 0.1);
+		new PathRenderer().outline(drawable, fpi);
+		gl.glPopMatrix();
+
+		gl.glPushMatrix();
+		gl.glScaled(10, -10, 1);
+		gl.glTranslated(-50, -51, 0);
+		shape = font.createGlyphVector(frc, "1 km").getOutline();
+		fpi = new FlatteningPathIterator(shape.getPathIterator(null), 0.1);
+		new PathRenderer().outline(drawable, fpi);
+		gl.glPopMatrix();
+
+		gl.glPushMatrix();
+		gl.glScaled(100, -100, 1);
+		gl.glTranslated(-50, -51, 0);
+		shape = font.createGlyphVector(frc, "10 km").getOutline();
+		fpi = new FlatteningPathIterator(shape.getPathIterator(null), 0.1);
+		new PathRenderer().outline(drawable, fpi);
+		gl.glPopMatrix();
+
 		gl.glEnable(GL.GL_DEPTH_TEST);
 	}
 
