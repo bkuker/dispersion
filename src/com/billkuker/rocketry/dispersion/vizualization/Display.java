@@ -8,8 +8,12 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.lang.reflect.Method;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.media.opengl.DebugGL2;
@@ -46,6 +50,31 @@ public class Display extends JPanel implements GLEventListener {
 	private static final long serialVersionUID = 1L;
 	private static final Logger log = LoggerFactory.getLogger(Display.class);
 
+	private static Set<FlightEvent.Type> markTypes = new HashSet<FlightEvent.Type>();
+	private static Set<FlightEvent.Type> trackColorTypes = new HashSet<FlightEvent.Type>();
+
+	static {
+		// These types are not shown
+		// markTypes.add(FlightEvent.Type.LAUNCH);
+		// markTypes.add(FlightEvent.Type.LIFTOFF);
+		// markTypes.add(FlightEvent.Type.LAUNCHROD);
+		// markTypes.add(FlightEvent.Type.GROUND_HIT);
+		// markTypes.add(FlightEvent.Type.SIMULATION_END);
+		// markTypes.add(FlightEvent.Type.ALTITUDE);
+
+		// These types change the color of the line
+		trackColorTypes.add(FlightEvent.Type.IGNITION);
+		trackColorTypes.add(FlightEvent.Type.BURNOUT);
+		trackColorTypes.add(FlightEvent.Type.RECOVERY_DEVICE_DEPLOYMENT);
+		trackColorTypes.add(FlightEvent.Type.TUMBLE);
+
+		// These types are shown as little balls
+		markTypes.add(FlightEvent.Type.EJECTION_CHARGE);
+		markTypes.add(FlightEvent.Type.STAGE_SEPARATION);
+		markTypes.add(FlightEvent.Type.APOGEE);
+		markTypes.add(FlightEvent.Type.EXCEPTION);
+	}
+
 	static {
 		// this allows the GL canvas and things like the motor selection
 		// drop down to z-order themselves.
@@ -55,8 +84,7 @@ public class Display extends JPanel implements GLEventListener {
 	static Method color;
 	static {
 		try {
-			color = EventGraphics.class.getDeclaredMethod("getEventColor",
-					FlightEvent.Type.class);
+			color = EventGraphics.class.getDeclaredMethod("getEventColor", FlightEvent.Type.class);
 		} catch (Exception e) {
 			throw new Error(e);
 		}
@@ -101,8 +129,7 @@ public class Display extends JPanel implements GLEventListener {
 		for (int bi = 0; bi < s.getSimulatedData().getBranchCount(); bi++) {
 			FlightDataBranch b = s.getSimulatedData().getBranch(bi);
 
-			final Coordinate c = new Coordinate(
-					b.getLast(FlightDataType.TYPE_POSITION_X),
+			final Coordinate c = new Coordinate(b.getLast(FlightDataType.TYPE_POSITION_X),
 					b.getLast(FlightDataType.TYPE_POSITION_Y), 0);
 			final double vz = b.getLast(FlightDataType.TYPE_VELOCITY_Z);
 
@@ -139,8 +166,7 @@ public class Display extends JPanel implements GLEventListener {
 		} catch (Throwable t) {
 			log.error("An error occurred creating 3d View", t);
 			canvas = null;
-			this.add(new JLabel("Unable to load 3d Libraries: "
-					+ t.getMessage()));
+			this.add(new JLabel("Unable to load 3d Libraries: " + t.getMessage()));
 		}
 	}
 
@@ -289,8 +315,8 @@ public class Display extends JPanel implements GLEventListener {
 		// gl.glDepthMask(true);
 	}
 
-	public void drawSimulation(final Simulation s, final boolean highlight,
-			final double a, final GLAutoDrawable drawable) {
+	public void drawSimulation(final Simulation s, final boolean highlight, final double a,
+			final GLAutoDrawable drawable) {
 
 		for (int b = 0; b < s.getSimulatedData().getBranchCount(); b++) {
 			drawBranch(s.getSimulatedData().getBranch(b), false, a, drawable);
@@ -298,45 +324,57 @@ public class Display extends JPanel implements GLEventListener {
 
 	}
 
-	public void drawBranch(final FlightDataBranch b, final boolean highlight,
-			final double a, final GLAutoDrawable drawable) {
+	public void drawBranch(final FlightDataBranch b, final boolean highlight, final double a,
+			final GLAutoDrawable drawable) {
 		int n = b.getLength();
 		List<Double> t = b.get(FlightDataType.TYPE_TIME);
 		List<Double> x = b.get(FlightDataType.TYPE_POSITION_X);
 		List<Double> y = b.get(FlightDataType.TYPE_POSITION_Y);
 		List<Double> z = b.get(FlightDataType.TYPE_ALTITUDE);
-		List<Double> vz = b.get(FlightDataType.TYPE_VELOCITY_Z);
 
-		List<Double> thrust = b.get(FlightDataType.TYPE_THRUST_FORCE);
-		double maxThrust = b.getMaximum(FlightDataType.TYPE_THRUST_FORCE);
+		if (simulations.size() <= 10)
+			gl.glLineWidth(3);
+		else if (simulations.size() <= 100)
+			gl.glLineWidth(2);
+		else
+			gl.glLineWidth(1);
 
-		/*
-		 * if (simulations.size() < 10) gl.glLineWidth(3); else if
-		 * (simulations.size() < 100) gl.glLineWidth(2); else gl.glLineWidth(1);
-		 */
-		gl.glLineWidth(1);
+		//A map of events to draw as markers and where to draw them
+		HashMap<FlightEvent, Coordinate> markEvents = new HashMap<FlightEvent, Coordinate>();
 
+		//Iterate through the flight path
 		gl.glBegin(GL.GL_LINE_STRIP);
+		List<FlightEvent> events = b.getEvents();
+		Collections.sort(events);
 		for (int i = 0; i < n; i++) {
-			double v = vz.get(i);
-			if (v < -5) {
-				v = MathUtil.clamp(v, -20, -5);
-				v = -v - 5;
-				v = v / 15;
-				gl.glColor4d(v, 0, 0, a);
-			} else {
-				double f = thrust.get(i);
-				if (f > 0) {
-					double c = f / maxThrust + .3;
-					gl.glColor4d(c, .8 * c, 0, a);
-				} else {
-					gl.glColor4d(0, 0, 0, a);
+			//If there is an event to consider
+			if (events.get(0).getTime() < t.get(i)) {
+				FlightEvent e = events.remove(0);
+				if (trackColorTypes.contains(e.getType())) {
+					//Change the track color based on this event
+					Color color = getEventColor(e.getType());
+					gl.glColor4d(color.getRed() / 255.0, color.getGreen() / 255.0, color.getBlue() / 255.0, 1);
+				}
+				if (markTypes.contains(e.getType())) {
+					//Note this even to mark later
+					markEvents.put(e, new Coordinate(x.get(i), y.get(i), z.get(i)));
 				}
 			}
 			gl.glVertex3d(x.get(i), y.get(i), z.get(i));
 		}
 		gl.glEnd();
 
+		//Draw a marker for every event 
+		for (Map.Entry<FlightEvent, Coordinate> e : markEvents.entrySet()) {
+			Color color = getEventColor(e.getKey().getType());
+			gl.glColor4d(color.getRed() / 255.0, color.getGreen() / 255.0, color.getBlue() / 255.0, 1);
+			gl.glPushMatrix();
+			gl.glTranslated(e.getValue().x, e.getValue().y, e.getValue().z);
+			glu.gluSphere(q, .006 * viewDist, 10, 10);
+			gl.glPopMatrix();
+		}
+		
+		//Optionally draw a curtain wall to highlight the ground track
 		if (highlight) {
 			gl.glLineWidth(1);
 			gl.glColor4d(0, 0, 0, .15);
@@ -356,28 +394,7 @@ public class Display extends JPanel implements GLEventListener {
 			gl.glEnd();
 		}
 
-		if (false) {
-			List<FlightEvent> events = b.getEvents();
-			Collections.sort(events);
-			outer: for (int i = 0; i < n - 1; i++) {
-				while (events.get(0).getTime() < t.get(i)) {
-					FlightEvent e = events.remove(0);
 
-					Color color = getEventColor(e.getType());
-					gl.glColor4d(color.getRed() / 255.0,
-							color.getGreen() / 255.0, color.getBlue() / 255.0,
-							1);
-
-					gl.glPushMatrix();
-					gl.glTranslated(x.get(i), y.get(i), z.get(i));
-
-					glu.gluSphere(q, .006 * viewDist, 10, 10);
-					gl.glPopMatrix();
-					if (events.size() == 0)
-						break outer;
-				}
-			}
-		}
 	}
 
 	public void drawPoints(final GLAutoDrawable drawable) {
@@ -489,8 +506,7 @@ public class Display extends JPanel implements GLEventListener {
 	}
 
 	@Override
-	public void reshape(final GLAutoDrawable drawable, final int x,
-			final int y, final int w, final int h) {
+	public void reshape(final GLAutoDrawable drawable, final int x, final int y, final int w, final int h) {
 		log.trace("GL - reshape()");
 		ratio = (double) w / (double) h;
 	}

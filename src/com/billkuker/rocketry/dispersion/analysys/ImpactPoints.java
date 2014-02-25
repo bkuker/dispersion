@@ -5,7 +5,6 @@ import net.sf.openrocket.simulation.FlightDataBranch;
 import net.sf.openrocket.simulation.FlightDataType;
 import net.sf.openrocket.util.Coordinate;
 
-import com.billkuker.rocketry.dispersion.core.Engine.SampleListener;
 import com.billkuker.rocketry.dispersion.core.Sample;
 
 public class ImpactPoints {

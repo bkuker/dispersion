@@ -6,15 +6,11 @@ import net.sf.openrocket.database.Databases;
 import net.sf.openrocket.document.OpenRocketDocument;
 import net.sf.openrocket.document.Simulation;
 import net.sf.openrocket.file.GeneralRocketLoader;
-import net.sf.openrocket.gui.util.GUIUtil;
 import net.sf.openrocket.gui.util.SwingPreferences;
 import net.sf.openrocket.logging.LoggingSystemSetup;
 import net.sf.openrocket.plugin.PluginModule;
 import net.sf.openrocket.startup.Application;
 import net.sf.openrocket.startup.GuiModule;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
