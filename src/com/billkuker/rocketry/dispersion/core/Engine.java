@@ -6,10 +6,13 @@ import java.util.Vector;
 
 import net.sf.openrocket.document.OpenRocketDocument;
 import net.sf.openrocket.document.Simulation;
+import net.sf.openrocket.simulation.SimulationStatus;
 import net.sf.openrocket.simulation.exception.SimulationException;
+import net.sf.openrocket.simulation.listeners.AbstractSimulationListener;
 
 import com.billkuker.rocketry.dispersion.core.mutators.Mutator;
 import com.billkuker.rocketry.dispersion.core.mutators.RocketMutator;
+import com.billkuker.rocketry.dispersion.core.mutators.SimulationConditionsMutator;
 import com.billkuker.rocketry.dispersion.core.mutators.SimulationOptionsMutator;
 
 public class Engine {
@@ -44,14 +47,20 @@ public class Engine {
 					((RocketMutator) m).mutate(doc.getRocket());
 				} else if (m instanceof SimulationOptionsMutator) {
 					((SimulationOptionsMutator) m).mutate(s.getOptions());
-				} else {
-					throw new Error("Don't know about " + m);
 				}
 			}
 
 			s.getOptions().setRandomSeed(r.nextInt());
 
-			s.simulate();
+			s.simulate(new AbstractSimulationListener() {
+				public void startSimulation(SimulationStatus status) throws SimulationException {
+					for (Mutator m : mutators) {
+						if (m instanceof SimulationConditionsMutator) {
+							((SimulationConditionsMutator) m).mutate(status.getSimulationConditions());
+						}
+					}
+				}
+			});
 
 			Sample sim = new Sample(s);
 
