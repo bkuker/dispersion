@@ -12,6 +12,7 @@ import net.sf.openrocket.gui.util.GUIUtil;
 import net.sf.openrocket.gui.util.SwingPreferences;
 import net.sf.openrocket.logging.LoggingSystemSetup;
 import net.sf.openrocket.plugin.PluginModule;
+import net.sf.openrocket.simulation.SimulationConditions;
 import net.sf.openrocket.startup.Application;
 import net.sf.openrocket.startup.GuiModule;
 
@@ -23,9 +24,12 @@ import com.billkuker.rocketry.dispersion.core.Sample;
 import com.billkuker.rocketry.dispersion.core.mutators.MassMutator;
 import com.billkuker.rocketry.dispersion.core.mutators.Mutator;
 import com.billkuker.rocketry.dispersion.core.mutators.RodAngleMutator;
+import com.billkuker.rocketry.dispersion.core.mutators.SimulationConditionsMutator;
 import com.billkuker.rocketry.dispersion.core.variables.Gaussian;
 import com.billkuker.rocketry.dispersion.core.variables.Uniform;
 import com.billkuker.rocketry.dispersion.vizualization.Display;
+import com.billkuker.rocketry.models.wind.DirectionWindModel;
+import com.billkuker.rocketry.models.wind.LayeredWindModel;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
@@ -82,6 +86,27 @@ public class Dispersion {
 		m.add(new MassMutator(new Gaussian(new Gaussian(0.0, 0.05), 0.05)));
 		// m.add(new ParachuteFailure(new Odds(.1)));
 		m.add(new RodAngleMutator(new Gaussian(0.04), new Uniform(-Math.PI, Math.PI)));
+		
+		m.add(new SimulationConditionsMutator() {
+			@Override
+			public void mutate(SimulationConditions sc) {
+				DirectionWindModel groundWind = new DirectionWindModel(sc.getRandomSeed());
+				groundWind.setAverage(5);
+				groundWind.setTurbulenceIntensity(0.5);
+				groundWind.setDirection(Math.PI / 2.0);
+				
+				DirectionWindModel aloftWind = new DirectionWindModel(sc.getRandomSeed());
+				aloftWind.setAverage(3);
+				aloftWind.setDirection(0);
+				aloftWind.setDirectionalStandardDeviation(Math.PI / 6);
+				aloftWind.setTurbulenceIntensity(0.5);
+				
+				LayeredWindModel l = new LayeredWindModel();
+				l.addEntry(0, groundWind);
+				l.addEntry(200, aloftWind);
+				sc.setWindModel(l);
+			}
+		});
 
 		// Run it!
 		Engine e = new Engine(orig, 1, m);
@@ -91,6 +116,6 @@ public class Dispersion {
 				d.addSimulation(s.getSimulation());
 			}
 		});
-		e.run(1000);
+		e.run(10);
 	}
 }
